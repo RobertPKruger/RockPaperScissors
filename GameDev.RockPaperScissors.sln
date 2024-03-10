@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDev.RockPaperScissors.GameAPI", "GameDev.RockPaperScissors.GameAPI\GameDev.RockPaperScissors.GameAPI.csproj", "{20E02878-1521-4375-93B6-07DA6F19A9D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameDev.RockPaperScissors.GameAPI", "GameDev.RockPaperScissors.GameAPI\GameDev.RockPaperScissors.GameAPI.csproj", "{20E02878-1521-4375-93B6-07DA6F19A9D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDev.RockPaperScissors.React.Server", "GameDev.RockPaperScissors.React\GameDev.RockPaperScissors.React.Server\GameDev.RockPaperScissors.React.Server.csproj", "{DDF53840-E34C-49A3-8CA0-D7D0F93FC256}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "gamedev.rockpaperscissors.react.client", "GameDev.RockPaperScissors.React\gamedev.rockpaperscissors.react.client\gamedev.rockpaperscissors.react.client.esproj", "{4A75931C-35E9-4C17-BF69-E0C4A9514530}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,16 @@ Global
 		{20E02878-1521-4375-93B6-07DA6F19A9D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20E02878-1521-4375-93B6-07DA6F19A9D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20E02878-1521-4375-93B6-07DA6F19A9D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDF53840-E34C-49A3-8CA0-D7D0F93FC256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDF53840-E34C-49A3-8CA0-D7D0F93FC256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDF53840-E34C-49A3-8CA0-D7D0F93FC256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDF53840-E34C-49A3-8CA0-D7D0F93FC256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A75931C-35E9-4C17-BF69-E0C4A9514530}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

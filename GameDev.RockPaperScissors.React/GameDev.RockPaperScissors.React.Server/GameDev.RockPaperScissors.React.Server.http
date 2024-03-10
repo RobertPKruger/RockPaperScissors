@@ -1,0 +1,6 @@
+@GameDev.RockPaperScissors.React.Server_HostAddress = http://localhost:5211
+
+GET {{GameDev.RockPaperScissors.React.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
