@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GameDev.RockPaperScissors.GameAPI\GameDev.RockPaperScissors.GameAPI.csproj" />
     <ProjectReference Include="..\gamedev.rockpaperscissors.react.client\gamedev.rockpaperscissors.react.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

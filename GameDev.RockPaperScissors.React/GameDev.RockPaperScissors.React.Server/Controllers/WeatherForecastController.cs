@@ -1,4 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using GameDev.RockPaperScissors.GameAPI;
+using GameDev.RockPaperScissors.GameAPI.ViewServices;
+using Newtonsoft.Json;
+using GameDev.RockPaperScissors.React.Server.Models;
+using System;
 
 namespace GameDev.RockPaperScissors.React.Server.Controllers
 {
@@ -6,28 +11,29 @@ namespace GameDev.RockPaperScissors.React.Server.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly INoaaAPI noaaAPI;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(INoaaAPI noaaAPI)
         {
-            _logger = logger;
+            this.noaaAPI = noaaAPI;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<WeatherForecast>?> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var localWeatherString = await noaaAPI.GetLocalWeather(44.1, -121.12);
+
+            var localWeather = JsonConvert.DeserializeObject<NoaaForecast>(localWeatherString);
+
+            var forecastArray = localWeather?.properties.periods?.Select(period => new WeatherForecast
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                Date = new DateOnly(period.startTime.Year, period.startTime.Month, period.startTime.Day),
+                TemperatureF = period.temperature,
+                Summary = period.detailedForecast
+            }).ToArray();
+
+            return forecastArray;
+
         }
     }
 }
