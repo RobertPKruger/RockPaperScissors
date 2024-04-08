@@ -5,17 +5,30 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
 {
     public static class RockPaperScissorsWebSockets
     {
-        public static async Task Echo(HttpContext context, WebSocket webSocket)
+        private static List<WebSocket> _connectedClients = new List<WebSocket>();
+
+        public static async Task Echo(HttpContext context, WebSocket currentSocket)
         {
+            _connectedClients.Add(currentSocket);
+
             var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            WebSocketReceiveResult result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             while (!result.CloseStatus.HasValue)
             {
-                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
-                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                foreach (var client in _connectedClients)
+                {
+                    if (client.State == WebSocketState.Open && client != currentSocket)
+                    {
+                        await client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                    }
+                }
+                result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+
+            _connectedClients.Remove(currentSocket);
+            await currentSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+
         }
     }
 
