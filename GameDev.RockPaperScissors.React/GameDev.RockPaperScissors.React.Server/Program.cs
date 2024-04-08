@@ -1,4 +1,6 @@
 using GameDev.RockPaperScissors.GameAPI.ViewServices;
+using GameDev.RockPaperScissors.React.Server.Websockets;
+using System.Net.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseWebSockets();
+app.Use(async (context, next) =>
+{
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        await RockPaperScissorsWebSockets.Echo(context, webSocket);
+    }
+    else
+    {
+        await next();
+    }
+});
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

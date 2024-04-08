@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using GameDev.RockPaperScissors.GameAPI;
 using GameDev.RockPaperScissors.GameAPI.ViewServices;
 using Newtonsoft.Json;
 using GameDev.RockPaperScissors.React.Server.Models;
-using System;
 
 namespace GameDev.RockPaperScissors.React.Server.Controllers
 {
