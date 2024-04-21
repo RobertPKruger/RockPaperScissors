@@ -44,8 +44,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                     game = new Game { Player1 = currentSocket };
                     _games[gameId] = game;
                 }
-                else
-                {
+
                     // Assign second player if not already assigned
                     if (game.Player2 == null && currentSocket != game.Player1)
                     {
@@ -69,7 +68,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                         // Reset moves for next round
                         game.Player1Move = game.Player2Move = null;
                     }
-                }
+                
 
                 result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }

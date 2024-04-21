@@ -7,7 +7,6 @@ import useGameWebSocket from './hooks/useGameWebsocket';
 
 const RPS = () => {
   const { sendMove, isConnected, incomingMessage } = useGameWebSocket('wss://localhost:7062/ws');
-  const [move, setMove] = useState('');
   const [serverMessages, setServerMessages] = useState([]);
 
   useEffect(() => {
@@ -18,7 +17,7 @@ const RPS = () => {
     }
   }, [incomingMessage]);
 
-  const handleMove = () => {
+  const handleMove = (move:string) => {
     if (move) {
       sendMove(move);
     }
@@ -28,8 +27,9 @@ const RPS = () => {
     <div>
       <h1>Rock Paper Scissors Game</h1>
       {isConnected ? <div>Status: Connected</div> : <div>Status: Disconnected</div>}
-      <input type="text" value={move} onChange={(e) => setMove(e.target.value)} />
-      <button onClick={handleMove}>Send Move</button>
+
+      <a href="#" onClick={() => { handleMove('rock'); }}>Rock</a> | <a href="#" onClick={() => { handleMove('paper'); }}>Paper</a> | <a href="#" onClick={() => { handleMove('scissors'); }}>Scissors</a>
+
       <div>
         <h2>Server Messages</h2>
         {serverMessages.map((msg, index) => <div key={index}>{JSON.stringify(msg)}</div>)}

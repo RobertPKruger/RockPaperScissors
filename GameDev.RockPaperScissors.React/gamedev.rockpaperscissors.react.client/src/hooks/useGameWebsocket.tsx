@@ -17,7 +17,7 @@ const useGameWebSocket = (url: string) => {
 
     wsCurrent.onmessage = (event) => {
       const receivedMessage = JSON.parse(event.data);
-      setIncomingMessage(receivedMessage);
+      setIncomingMessage(receivedMessage.Data);
     };
 
     wsCurrent.onclose = () => {
