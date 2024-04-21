@@ -28,3 +28,12 @@ export default {
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+
+- Applications in this project                                                          
+This project demos a couple of application concepts: a rock-paper-scissors and a weather-report page that pulls from the NOAA public api.
+
+- Rock-Paper-Scissors
+We have a websockets connection. We need to create a matchmaking feature to assign an id for pairs of players to track state. We need to implement an escrow-type function to hold player moves until both moves are entered, and we need to invalid moves within a tight window, because moves should be effectively simultaneous.
+
+- Weather Report

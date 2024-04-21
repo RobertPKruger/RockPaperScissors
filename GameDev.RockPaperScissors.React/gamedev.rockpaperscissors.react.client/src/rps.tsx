@@ -20,7 +20,7 @@ const RPS = () => {
 
   const handleMove = () => {
     if (move) {
-      sendMove({ action: 'move', data: move });
+      sendMove(move);
     }
   };
 

@@ -31,9 +31,14 @@ const useGameWebSocket = (url: string) => {
     };
   }, [url]);
 
-  const sendMove = (move:object) => {
+  const sendMove = (move:string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify(move));
+      const gameMove = {
+        gameId: "47ec3a5b-2d2f-4a91-966f-ae0e3c1af779",
+        move: move
+      };
+      ws.current.send(JSON.stringify(gameMove)); // Send move as a JSON string
+      console.log('Sent: ' + JSON.stringify(gameMove));
     }
   };
 
