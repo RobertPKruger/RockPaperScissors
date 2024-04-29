@@ -13,11 +13,12 @@ const useGameWebSocket = (url: string) => {
     wsCurrent.onopen = () => {
       console.log('WebSocket connected');
       setIsConnected(true);
+      sendMove("", 'initialConnection');
     };
 
     wsCurrent.onmessage = (event) => {
       const receivedMessage = JSON.parse(event.data);
-      setIncomingMessage(receivedMessage.Data);
+      setIncomingMessage(receivedMessage);
     };
 
     wsCurrent.onclose = () => {
@@ -31,10 +32,10 @@ const useGameWebSocket = (url: string) => {
     };
   }, [url]);
 
-  const sendMove = (move:string) => {
+  const sendMove = (gameId:string, move:string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       const gameMove = {
-        gameId: "47ec3a5b-2d2f-4a91-966f-ae0e3c1af779",
+        gameId: gameId,
         move: move
       };
       ws.current.send(JSON.stringify(gameMove)); // Send move as a JSON string

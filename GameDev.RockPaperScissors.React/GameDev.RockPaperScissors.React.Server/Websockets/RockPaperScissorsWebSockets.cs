@@ -1,12 +1,29 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
 namespace GameDev.RockPaperScissors.React.Server.Websockets
 {
-    public class Game
+
+    public class  MessageType
+    { 
+        public string GameId { get; set; }
+        public string MsgType { get; set; } = ""; //createGame, joinGame, initialConnection
+    }
+
+    public class InitialConnection : MessageType
     {
+        public string ServerNotes { get; set; }
+
+        public List<Game> Games { get; set; }
+    }
+
+    public class Game : MessageType
+    {
+        public string Name { get; set; }
+
         public WebSocket Player1 { get; set; }
         public WebSocket Player2 { get; set; }
         public string Player1Move { get; set; }
@@ -34,11 +51,95 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                 string receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 // Assuming the message format is simple JSON like { "gameId": "some-id", "move": "rock" }
                 var moveData = JsonSerializer.Deserialize<Dictionary<string, string>>(receivedMessage);
+
+
                 var gameId = moveData["gameId"];
                 var move = moveData["move"];
 
-                // Fetch or create game state from dictionary
                 Game game;
+
+                if (move == "initialConnection")
+                {
+
+                    var games = _games.Values.ToList();
+
+                    var initialConnection = new InitialConnection { MsgType = "initialConnection", ServerNotes = "Welcome to the server", Games = games };
+
+                    await SendMessage(currentSocket, JsonSerializer.Serialize(initialConnection));
+                   result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    //return;
+                };
+
+                receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                moveData = JsonSerializer.Deserialize<Dictionary<string, string>>(receivedMessage);
+
+
+                gameId = moveData["gameId"];
+                move = moveData["move"];
+
+                if (move == "createGame"){
+
+                    var name = gameId;
+
+                    gameId = $"{gameId}-{Guid.NewGuid()}";
+
+                    foreach(var client in _connectedClients )
+                    {
+                        //if (client != currentSocket)
+                        //{
+                        game = new Game { GameId = gameId, Name = name, MsgType="newGame", Player1 = currentSocket };
+
+                        _games[gameId] = game;
+
+                        await SendMessage(client, JsonSerializer.Serialize(game));
+                       // }
+                    }
+
+                   result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                   // return;
+                };
+
+                receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                moveData = JsonSerializer.Deserialize<Dictionary<string, string>>(receivedMessage);
+
+
+                gameId = moveData["gameId"];
+                move = moveData["move"];
+
+                if (move == "joinGame")
+                {
+
+                    if (!_games.TryGetValue(gameId, out game))
+                    {
+                        game = new Game { Player1 = currentSocket };
+                        _games[gameId] = game;
+                    }
+
+                    // Assign second player, and notify both players
+                    if (game.Player2 == null && currentSocket != game.Player1)
+                    {
+                        var joinMessage = new MessageType { GameId = gameId, MsgType = "gameJoined" };
+
+                        game.Player2 = currentSocket;
+                        await SendMessage(currentSocket, JsonSerializer.Serialize(joinMessage));
+                        await SendMessage(game.Player1, JsonSerializer.Serialize(joinMessage));
+                    }
+
+                   result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    //return;
+                };
+
+                receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                moveData = JsonSerializer.Deserialize<Dictionary<string, string>>(receivedMessage);
+
+
+                gameId = moveData["gameId"];
+                move = moveData["move"];
+
+                // Fetch or create game state from dictionary
                 if (!_games.TryGetValue(gameId, out game))
                 {
                     game = new Game { Player1 = currentSocket };
