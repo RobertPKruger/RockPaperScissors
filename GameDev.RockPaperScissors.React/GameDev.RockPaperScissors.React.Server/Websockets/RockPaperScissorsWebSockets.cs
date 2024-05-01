@@ -189,10 +189,8 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
         {
             // Simplified example of determining the winner
             if (move1 == move2) return "Draw!";
-            if (move1 == "rock" && move2 == "scissors") return "Player 1 wins!";
-            if (move1 == "scissors" && move2 == "paper") return "Player 1 wins!";
-            if (move1 == "paper" && move2 == "rock") return "Player 1 wins!";
-            return "Player 2 wins!";
+            if (move1 == "rock" && move2 == "scissors" || move1 == "scissors" && move2 == "paper" || move1 == "paper" && move2 == "rock") return $"Player 1 wins with {move1} over {move2}!";
+            return $"Player 2 wins with {move2} over {move1}!";
         }
 
         // Dictionary to store game states

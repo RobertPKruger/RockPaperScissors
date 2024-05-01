@@ -1,5 +1,5 @@
 import './App.css';
-
+import ListGroup from './components/ListGroup';
 
 import { useState, useEffect } from 'react';
 import useGameWebSocket from './hooks/useGameWebsocket';
@@ -74,6 +74,10 @@ const RPS = () => {
     }
   };
 
+  const handleGameClick = (game) => {
+    joinGame(game.id);
+  };
+
   return (
     <div>
       <h1>Rock Paper Scissors Game</h1>
@@ -107,14 +111,8 @@ const RPS = () => {
             </div>
           )}
           <div>
-            <h2>Game List</h2>
-            <ul>
-              {gameList.map((game) => (
-                <li key={game.id}>
-                  <a href="#" onClick={() => joinGame(game.id)}>{game.name}</a>
-                </li>
-              ))}
-            </ul>
+              <h2>Game List</h2>
+              <ListGroup items={gameList} onItemClick={handleGameClick} />
           </div>
         </>
       )}
