@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
+import IncomingMessage from '../models/IncomingMessage';
 
 const useGameWebSocket = (url: string) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [incomingMessage, setIncomingMessage] = useState(null);
+  const [incomingMessage, setIncomingMessage] = useState<IncomingMessage | null > (null);
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ const useGameWebSocket = (url: string) => {
     };
 
     wsCurrent.onmessage = (event) => {
-      const receivedMessage = JSON.parse(event.data);
+      const receivedMessage : IncomingMessage = JSON.parse(event.data);
       setIncomingMessage(receivedMessage);
     };
 

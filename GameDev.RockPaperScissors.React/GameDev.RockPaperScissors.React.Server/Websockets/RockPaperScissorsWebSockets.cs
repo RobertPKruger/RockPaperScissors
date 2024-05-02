@@ -6,10 +6,18 @@ using System.Text.Json;
 
 namespace GameDev.RockPaperScissors.React.Server.Websockets
 {
-
+    public static class GameState
+    {
+        public static string CreateGame = "createGame";
+        public static string JoinGame = "joinGame";
+        public static string InitialConnection = "initialConnection";
+        public static string NewGame = "newGame";
+        public static string GameJoined = "gameJoined";
+    }
     public class  MessageType
-    { 
-        public string GameId { get; set; }
+    {
+        public string Name { get; set; }
+        public string Id { get; set; }
         public string MsgType { get; set; } = ""; //createGame, joinGame, initialConnection
     }
 
@@ -22,8 +30,6 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
 
     public class Game : MessageType
     {
-        public string Name { get; set; }
-
         public WebSocket Player1 { get; set; }
         public WebSocket Player2 { get; set; }
         public string Player1Move { get; set; }
@@ -58,12 +64,12 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
 
                 Game game;
 
-                if (move == "initialConnection")
+                if (move == GameState.InitialConnection)
                 {
 
                     var games = _games.Values.ToList();
 
-                    var initialConnection = new InitialConnection { MsgType = "initialConnection", ServerNotes = "Welcome to the server", Games = games };
+                    var initialConnection = new InitialConnection { MsgType = GameState.InitialConnection, ServerNotes = "Welcome to the server", Games = games };
 
                     await SendMessage(currentSocket, JsonSerializer.Serialize(initialConnection));
                    result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -78,7 +84,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                 gameId = moveData["gameId"];
                 move = moveData["move"];
 
-                if (move == "createGame"){
+                if (move == GameState.CreateGame){
 
                     var name = gameId;
 
@@ -88,7 +94,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                     {
                         //if (client != currentSocket)
                         //{
-                        game = new Game { GameId = gameId, Name = name, MsgType="newGame", Player1 = currentSocket };
+                        game = new Game { Id = gameId, Name = name, MsgType=GameState.NewGame, Player1 = currentSocket };
 
                         _games[gameId] = game;
 
@@ -108,7 +114,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                 gameId = moveData["gameId"];
                 move = moveData["move"];
 
-                if (move == "joinGame")
+                if (move == GameState.JoinGame)
                 {
 
                     if (!_games.TryGetValue(gameId, out game))
@@ -120,7 +126,7 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                     // Assign second player, and notify both players
                     if (game.Player2 == null && currentSocket != game.Player1)
                     {
-                        var joinMessage = new MessageType { GameId = gameId, MsgType = "gameJoined" };
+                        var joinMessage = new MessageType { Id = gameId, MsgType = GameState.GameJoined };
 
                         game.Player2 = currentSocket;
                         await SendMessage(currentSocket, JsonSerializer.Serialize(joinMessage));

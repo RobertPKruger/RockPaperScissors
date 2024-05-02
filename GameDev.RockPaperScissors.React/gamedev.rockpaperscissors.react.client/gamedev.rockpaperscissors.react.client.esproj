@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="src\hooks\" />
+    <Folder Include="src\models\interfaces\" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,12 @@
 class NameId {
-  id: number;
-  name: string;
+  Id: string;
+  Name: string;
 
-  constructor(id: number, name: string) {
-    this.id = id;
-    this.name = name;
+  // You can add additional properties or methods specific to the subclass
+
+  constructor(id: string, name: string) {
+    this.Id = id;
+    this.Name = name;
   }
 }
 

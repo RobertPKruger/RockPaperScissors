@@ -1,17 +1,12 @@
 // ListGroup.tsx
-import NameId from '../models/NameId'; // Import the NameId class
+import IListGroupProps from '../models/interfaces/IListGroupProps'; // Import the IListGroupProps interface
 
-interface ListGroupProps {
-  items: NameId[]; // Use the NameId class for items
-  onItemClick: (item: NameId) => void; // Use NameId for the onItemClick callback
-}
-
-function ListGroup({ items, onItemClick }: ListGroupProps) {
+function ListGroup({ items, onItemClick }: IListGroupProps) {
   return (
     <ul className="list-group">
       {items.map((item) => (
-        <li key={item.id} className="list-group-item">
-          <a href="#" onClick={() => onItemClick(item)}>{item.name}</a>
+        <li key={item.Id} className="list-group-item">
+          <a href="#" onClick={() => onItemClick(item)}>{item.Name}</a>
         </li>
       ))}
     </ul>
