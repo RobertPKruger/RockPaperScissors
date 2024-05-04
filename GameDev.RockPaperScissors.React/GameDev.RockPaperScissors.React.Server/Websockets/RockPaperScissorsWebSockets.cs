@@ -13,12 +13,16 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
         public static string InitialConnection = "initialConnection";
         public static string NewGame = "newGame";
         public static string GameJoined = "gameJoined";
+        public static string ExitGame = "exitGame";
+        public static string GameFinished = "gameFinished";
     }
     public class  MessageType
     {
         public string Name { get; set; }
         public string Id { get; set; }
         public string MsgType { get; set; } = ""; //createGame, joinGame, initialConnection
+
+        public string Data { get; set;}
     }
 
     public class InitialConnection : MessageType
@@ -63,6 +67,16 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                 var move = moveData["move"];
 
                 Game game;
+
+                if(move == GameState.ExitGame)
+                {
+                    if (_games.TryGetValue(gameId, out game))
+                    {
+                        await ResolveGame(game, true);
+                    }
+                    result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    //continue;
+                }
 
                 if (move == GameState.InitialConnection)
                 {
@@ -141,7 +155,6 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                 receivedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 moveData = JsonSerializer.Deserialize<Dictionary<string, string>>(receivedMessage);
 
-
                 gameId = moveData["gameId"];
                 move = moveData["move"];
 
@@ -152,29 +165,23 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                     _games[gameId] = game;
                 }
 
-                    // Assign second player if not already assigned
-                    if (game.Player2 == null && currentSocket != game.Player1)
-                    {
-                        game.Player2 = currentSocket;
-                    }
+                // Assign second player if not already assigned
+                if (game.Player2 == null && currentSocket != game.Player1)
+                {
+                    game.Player2 = currentSocket;
+                }
 
-                    // Update move based on player
-                    if (currentSocket == game.Player1)
-                        game.Player1Move = move;
-                    else if (currentSocket == game.Player2)
-                        game.Player2Move = move;
+                // Update move based on player
+                if (currentSocket == game.Player1)
+                    game.Player1Move = move;
+                else if (currentSocket == game.Player2)
+                    game.Player2Move = move;
 
-                    // Check if both moves are made
-                    if (game.Player1Move != null && game.Player2Move != null)
-                    {
-                        // Determine result and respond
-                        GameMove resultMessage = new GameMove{ Data = DetermineWinner(game.Player1Move, game.Player2Move) };
-                        var gameResult = JsonSerializer.Serialize(resultMessage);
-                        await SendMessage(game.Player1, gameResult);
-                        await SendMessage(game.Player2, gameResult);
-                        // Reset moves for next round
-                        game.Player1Move = game.Player2Move = null;
-                    }
+                // Check if both moves are made
+                if (game.Player1Move != null && game.Player2Move != null)
+                {
+                    await ResolveGame(game);
+                }
                 
 
                 result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -182,6 +189,28 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
 
             _connectedClients.Remove(currentSocket);
             await currentSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+        }
+
+        private static async Task ResolveGame(Game game, bool canceled = false)
+        {
+            // Determine result and respond
+            MessageType resultMessage = new MessageType();
+
+            if (canceled) {
+                resultMessage.Data = "canceled";
+                resultMessage.MsgType = GameState.ExitGame;
+            } else { 
+                resultMessage.Data = DetermineWinner(game.Player1Move, game.Player2Move);
+                resultMessage.MsgType = GameState.GameFinished;
+            }
+
+            var gameResult = JsonSerializer.Serialize(resultMessage);
+            await SendMessage(game.Player1, gameResult);
+            await SendMessage(game.Player2, gameResult);
+
+            // Reset moves for next round
+            //game.Player1Move = game.Player2Move = null;
+            _games.Remove(game.Id, out game);
         }
 
         private static async Task SendMessage(WebSocket socket, string message)

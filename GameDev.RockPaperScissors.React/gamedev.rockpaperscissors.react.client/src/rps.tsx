@@ -7,50 +7,67 @@ import { useState, useEffect } from 'react';
 import useGameWebSocket from './hooks/useGameWebsocket';
 
 import GameState from './models/GameState';
+import Game from './models/Game';
 
 
 const RPS = () => {
-  const [gameList, setGameList] = useState<NameId[]>([]);
+  const [gamesList, setGameList] = useState<Game[]>([]);
+  const [currentGame, setCurrentGame] = useState<Game>();
   const [gameName, setGameName] = useState('');
+  const [currentPlayer, setCurrentPlayer] = useState('');
+  const [playerMove, setPlayerMove] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(false);
-  const [selectedGameId, setSelectedGameId] = useState<string>();
 
   const { sendMove, isConnected, incomingMessage }:
     { sendMove: any, isConnected: boolean, incomingMessage: IncomingMessage | null } = useGameWebSocket('wss://localhost:7062/ws');
   const [serverMessages, setServerMessages] = useState<IncomingMessage[]>([]);
 
   useEffect(() => {
-    if (incomingMessage) {
-      // Handle the incoming message
-      // For example, add it to an array of messages to display in the UI
-      if (incomingMessage.MsgType == GameState.InitialConnection) {
 
-      // Add the Games to the game list
-         for(var i = 0; i < incomingMessage.Games.length; i++) {
-            const game = incomingMessage.Games[i];
-            const newGame = { Id: game.Id, Name: game.Name };
-            setGameList(prevList => [...prevList, newGame]);
-          }
-        
-      } else if (incomingMessage.MsgType == GameState.NewGame) {
-
-        // Add the new game to the game list
-        const newGame = { Id: incomingMessage.Id, Name: incomingMessage.Name };
-        setGameList(prevList => [...prevList, newGame]);
-      }
-      else if (incomingMessage.MsgType == GameState.GameJoined) {
-        setSelectedGameId(incomingMessage.Id);
+    switch (incomingMessage?.MsgType) {
+       case GameState.InitialConnection:
+        for (var i = 0; i < incomingMessage.Games.length; i++) {
+          const game = incomingMessage.Games[i];
+          const newGame = new Game(game.Id, game.Name);
+          setGameList(gamesList => [...gamesList, newGame]);
+        }
+        break;
+      case GameState.NewGame:
+        const newGame = new Game(incomingMessage.Id, incomingMessage.Name);
+        setGameList(gamesList => [...gamesList, newGame]);
+        setCurrentGame(newGame);
+        setServerMessages([]);
+        break;
+      case GameState.GameJoined:
+        const selectedGame = gamesList.find(game => game.Id === incomingMessage.Id);
+        if (selectedGame) {
+          selectedGame.Ready = true;
+          setCurrentGame(selectedGame);
+          setIsWaitingForOpponent(false);
+        }
+        break;
+      case GameState.ExitGame:
+        setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
+        setCurrentGame(undefined);
         setIsWaitingForOpponent(false);
-      }
-      else {
         setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
-      }
+        break;
+      case GameState.GameFinished:
+        setCurrentGame(undefined);
+        setIsWaitingForOpponent(false);
+        setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+        setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
+        break;
+      default:
+        if(incomingMessage)
+        setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
     }
   }, [incomingMessage]);
 
   const createGame = () => {
     setIsCreatingGame(true);
+    setCurrentPlayer("Player1");
   };
 
 
@@ -65,18 +82,21 @@ const RPS = () => {
   const joinGame = (gameId:string) => {
     // Send a message to the server to join the selected game
     // Handle the response from the server
-    setSelectedGameId(gameId);
     sendMove(gameId, GameState.JoinGame);
+    setCurrentPlayer("Player2");
   };
 
   const exitGame = () => {
-    // Send a message to the server to exit the current game
-    setSelectedGameId('exit');
+    // Send a message to the server to exit the current game 
+    sendMove(currentGame?.Id, GameState.ExitGame);
+    setCurrentGame(undefined);
+
   };
 
   const handleMove = (gameId:string, move:string) => {
     if (move) {
       sendMove(gameId, move);
+      setPlayerMove(move);
     }
   };
 
@@ -87,16 +107,22 @@ const RPS = () => {
   return (
     <div>
       <h1>Rock Paper Scissors Game</h1>
+      <h2>{currentPlayer}</h2>
+      <h2>{playerMove}</h2>
       {isConnected ? <div>Status: Connected</div> : <div>Status: Disconnected</div>}
 
-      {selectedGameId ? (
+      {currentGame?.Ready ? (
         <>
-          <div>
-            <a href="#" onClick={() => { handleMove(selectedGameId, 'rock'); }}>Rock</a> | <a href="#" onClick={() => { handleMove(selectedGameId, 'paper'); }}>Paper</a> | <a href="#" onClick={() => { handleMove(selectedGameId,'scissors'); }}>Scissors</a>
-          </div>
-          <div>
-            <button onClick={exitGame}>Exit Game</button>
-          </div>
+          {playerMove === '' &&
+            (<div>
+              <div>
+              <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'rock'); }}>Rock</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'paper'); }}>Paper</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '','scissors'); }}>Scissors</a>
+            </div>
+            <div>
+              <button onClick={exitGame}>Exit Game</button>
+              </div>
+            </div>)
+          }
         </>
       ) : (
         <>
@@ -119,7 +145,7 @@ const RPS = () => {
             {!isWaitingForOpponent && (
           <div>
               <h2>Game List</h2>
-              <ListGroup items={gameList} onItemClick={handleGameClick} />
+              <ListGroup items={gamesList} onItemClick={handleGameClick} />
               </div>
             )}
         </>

@@ -1,4 +1,4 @@
-import NameId  from "../NameId";
+import NameId  from "../models/NameId";
 
 interface IListGroupProps {
   items: NameId[]; // Use the NameId class for items

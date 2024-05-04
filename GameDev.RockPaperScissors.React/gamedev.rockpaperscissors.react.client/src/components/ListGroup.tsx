@@ -1,5 +1,5 @@
 // ListGroup.tsx
-import IListGroupProps from '../models/interfaces/IListGroupProps'; // Import the IListGroupProps interface
+import IListGroupProps from '../interfaces/IListGroupProps'; // Import the IListGroupProps interface
 
 function ListGroup({ items, onItemClick }: IListGroupProps) {
   return (
