@@ -41,6 +41,7 @@ const RPS = () => {
       }
       else if (incomingMessage.MsgType == GameState.GameJoined) {
         setSelectedGameId(incomingMessage.Id);
+        setIsWaitingForOpponent(false);
       }
       else {
         setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
@@ -114,11 +115,13 @@ const RPS = () => {
             <div>
               <p>Waiting for opponent...</p>
             </div>
-          )}
+            )}
+            {!isWaitingForOpponent && (
           <div>
               <h2>Game List</h2>
               <ListGroup items={gameList} onItemClick={handleGameClick} />
-          </div>
+              </div>
+            )}
         </>
       )}
 
