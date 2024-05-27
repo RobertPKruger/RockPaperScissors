@@ -26,20 +26,21 @@ const RPS = () => {
   useEffect(() => {
 
     switch (incomingMessage?.MsgType) {
-       case GameState.InitialConnection:
-        for (var i = 0; i < incomingMessage.Games.length; i++) {
+      case GameState.InitialConnection:
+        for (let i = 0; i < incomingMessage.Games.length; i++) {
           const game = incomingMessage.Games[i];
           const newGame = new Game(game.Id, game.Name);
           setGameList(gamesList => [...gamesList, newGame]);
         }
         break;
-      case GameState.NewGame:
+      case GameState.NewGame: {
         const newGame = new Game(incomingMessage.Id, incomingMessage.Name);
         setGameList(gamesList => [...gamesList, newGame]);
         setCurrentGame(newGame);
         setServerMessages([]);
         break;
-      case GameState.GameJoined:
+      }
+      case GameState.GameJoined: {
         const selectedGame = gamesList.find(game => game.Id === incomingMessage.Id);
         if (selectedGame) {
           selectedGame.Ready = true;
@@ -47,6 +48,7 @@ const RPS = () => {
           setIsWaitingForOpponent(false);
         }
         break;
+      }
       case GameState.ExitGame:
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
         setCurrentGame(undefined);
@@ -60,8 +62,8 @@ const RPS = () => {
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
         break;
       default:
-        if(incomingMessage)
-        setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+        if (incomingMessage)
+          setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
     }
   }, [incomingMessage]);
 
@@ -79,7 +81,7 @@ const RPS = () => {
     setIsWaitingForOpponent(true); // Display "Waiting for opponent" UI
   };
 
-  const joinGame = (gameId:string) => {
+  const joinGame = (gameId: string) => {
     // Send a message to the server to join the selected game
     // Handle the response from the server
     sendMove(gameId, GameState.JoinGame);
@@ -93,14 +95,14 @@ const RPS = () => {
 
   };
 
-  const handleMove = (gameId:string, move:string) => {
+  const handleMove = (gameId: string, move: string) => {
     if (move) {
       sendMove(gameId, move);
       setPlayerMove(move);
     }
   };
 
-  const handleGameClick = (game:NameId) => {
+  const handleGameClick = (game: NameId) => {
     joinGame(game.Id);
   };
 
@@ -116,10 +118,10 @@ const RPS = () => {
           {playerMove === '' &&
             (<div>
               <div>
-              <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'rock'); }}>Rock</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'paper'); }}>Paper</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '','scissors'); }}>Scissors</a>
-            </div>
-            <div>
-              <button onClick={exitGame}>Exit Game</button>
+                <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'rock'); }}>Rock</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'paper'); }}>Paper</a> | <a href="#" onClick={() => { handleMove(currentGame?.Id ?? '', 'scissors'); }}>Scissors</a>
+              </div>
+              <div>
+                <button onClick={exitGame}>Exit Game</button>
               </div>
             </div>)
           }
@@ -141,13 +143,13 @@ const RPS = () => {
             <div>
               <p>Waiting for opponent...</p>
             </div>
-            )}
-            {!isWaitingForOpponent && (
-          <div>
+          )}
+          {!isWaitingForOpponent && (
+            <div>
               <h2>Game List</h2>
               <ListGroup items={gamesList} onItemClick={handleGameClick} />
-              </div>
-            )}
+            </div>
+          )}
         </>
       )}
 
