@@ -56,10 +56,10 @@ const RPS = () => {
         setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
         break;
       case GameState.GameFinished:
-        setCurrentGame(undefined);
         setIsWaitingForOpponent(false);
         setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
+        setCurrentGame(undefined);
         break;
       default:
         if (incomingMessage)
@@ -74,6 +74,10 @@ const RPS = () => {
 
 
   const handleCreateGame = () => {
+    if(!gameName) {
+      return;
+    }
+
     // Send the game name to the server to create a new game
     // Handle the response from the server
     setIsCreatingGame(false);
