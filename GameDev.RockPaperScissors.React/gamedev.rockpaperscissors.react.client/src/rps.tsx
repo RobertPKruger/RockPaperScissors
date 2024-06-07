@@ -17,6 +17,7 @@ const RPS = () => {
   const [currentPlayer, setCurrentPlayer] = useState('');
   const [playerMove, setPlayerMove] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [showReconnect, setShowReconnect] = useState(false);
   const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(false);
 
   const { sendMove, isConnected, incomingMessage }:
@@ -60,6 +61,7 @@ const RPS = () => {
         setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
         setCurrentGame(undefined);
+        setShowReconnect(true);
         break;
       default:
         if (incomingMessage)
@@ -115,8 +117,13 @@ const RPS = () => {
       <h1>Rock Paper Scissors Game</h1>
       <h2>{currentPlayer}</h2>
       <h2>{playerMove}</h2>
-      {isConnected ? <div>Status: Connected</div> : <div>Status: Disconnected</div>}
-
+      
+      {!showReconnect && (
+        <>
+          {isConnected ? <div>Status: Connected</div> : <div>Status: Disconnected</div>}
+        </>)
+        }
+    
       {currentGame?.Ready ? (
         <>
           {playerMove === '' &&
@@ -132,7 +139,7 @@ const RPS = () => {
         </>
       ) : (
         <>
-          {!isCreatingGame && !isWaitingForOpponent && (
+          {!isCreatingGame && !isWaitingForOpponent && !showReconnect && (
             <div>
               <button onClick={createGame}>Create New Game</button>
             </div>
@@ -148,12 +155,17 @@ const RPS = () => {
               <p>Waiting for opponent...</p>
             </div>
           )}
-          {!isWaitingForOpponent && (
+          {!isWaitingForOpponent && !showReconnect && (
             <div>
               <h2>Game List</h2>
               <ListGroup items={gamesList} onItemClick={handleGameClick} />
             </div>
-          )}
+            )}
+            {showReconnect && (
+              <div>
+                <button onClick={() => window.location.reload()}>Reconnect</button>
+              </div>
+            )}
         </>
       )}
 

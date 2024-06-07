@@ -8,17 +8,25 @@ const useGameWebSocket = (url: string) => {
 
   useEffect(() => {
     // Initialize WebSocket connection
+    createWebSocket(url);
+
+    // Cleanup on unmount
+    return () => {
+      ws.current?.close();
+    };
+  }, [url]);
+
+
+  const createWebSocket = (url:string) => {
     ws.current = new WebSocket(url);
     const wsCurrent = ws.current;
-
     wsCurrent.onopen = () => {
       console.log('WebSocket connected');
       setIsConnected(true);
       sendMove("", 'initialConnection');
     };
-
     wsCurrent.onmessage = (event) => {
-      const receivedMessage : IncomingMessage = JSON.parse(event.data);
+      const receivedMessage: IncomingMessage = JSON.parse(event.data);
       setIncomingMessage(receivedMessage);
     };
 
@@ -26,12 +34,7 @@ const useGameWebSocket = (url: string) => {
       console.log('WebSocket disconnected');
       setIsConnected(false);
     };
-
-    // Cleanup on unmount
-    return () => {
-      wsCurrent.close();
-    };
-  }, [url]);
+  };
 
   const sendMove = (gameId:string, move:string) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
