@@ -1,5 +1,5 @@
 import './App.css';
-import ListGroup from './components/ListGroup';
+import GamesListGroup from './components/GamesListGroup';
 import NameId from './models/NameId';
 import IncomingMessage from './models/IncomingMessage';
 
@@ -25,7 +25,7 @@ const RPS = () => {
   const [serverMessages, setServerMessages] = useState<IncomingMessage[]>([]);
 
   useEffect(() => {
-
+    console.log(gamesList);
     switch (incomingMessage?.MsgType) {
       case GameState.InitialConnection:
         for (let i = 0; i < incomingMessage.Games.length; i++) {
@@ -38,7 +38,7 @@ const RPS = () => {
         const newGame = new Game(incomingMessage.Id, incomingMessage.Name);
         setGameList(gamesList => [...gamesList, newGame]);
         setCurrentGame(newGame);
-        setServerMessages([]);
+        updateServerMessages(true);
         break;
       }
       case GameState.GameJoined: {
@@ -46,6 +46,7 @@ const RPS = () => {
         if (selectedGame) {
           selectedGame.Ready = true;
           setCurrentGame(selectedGame);
+          setPlayerMove('');
           setIsWaitingForOpponent(false);
         }
         break;
@@ -54,20 +55,31 @@ const RPS = () => {
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
         setCurrentGame(undefined);
         setIsWaitingForOpponent(false);
-        setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+        updateServerMessages(false, incomingMessage);
         break;
       case GameState.GameFinished:
         setIsWaitingForOpponent(false);
-        setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+        updateServerMessages(false, incomingMessage);
         setGameList(gamesList => gamesList.filter(game => game.Id !== currentGame?.Id));
         setCurrentGame(undefined);
         setShowReconnect(true);
         break;
       default:
         if (incomingMessage)
-          setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+          updateServerMessages(false, incomingMessage);
     }
   }, [incomingMessage]);
+
+  const updateServerMessages = (clear: boolean = false, incomingMessage?: IncomingMessage) => {
+    console.log(serverMessages);
+    if (clear) {
+      setServerMessages([]);
+      return;
+    }
+    if(incomingMessage != null)
+    setServerMessages(prevMessages => [...prevMessages, incomingMessage]);
+  }
+
 
   const createGame = () => {
     setIsCreatingGame(true);
@@ -158,7 +170,7 @@ const RPS = () => {
           {!isWaitingForOpponent && !showReconnect && (
             <div>
               <h2>Game List</h2>
-              <ListGroup items={gamesList} onItemClick={handleGameClick} />
+              <GamesListGroup items={gamesList} onItemClick={handleGameClick} />
             </div>
             )}
             {showReconnect && (
@@ -169,8 +181,7 @@ const RPS = () => {
         </>
       )}
 
-      <div>
-        <h2>Server Messages</h2>
+      <div id="divServerMessages">
         {serverMessages.map((msg, index) => <div key={index}>{JSON.stringify(msg)}</div>)}
       </div>
     </div>

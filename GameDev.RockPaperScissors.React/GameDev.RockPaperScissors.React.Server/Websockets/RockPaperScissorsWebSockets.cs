@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.Eventing.Reader;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -38,6 +39,8 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
         public WebSocket Player2 { get; set; }
         public string Player1Move { get; set; }
         public string Player2Move { get; set; }
+
+        public bool IsInProgress { get; set; } = false;
     }
 
     public static class RockPaperScissorsWebSockets
@@ -142,6 +145,8 @@ namespace GameDev.RockPaperScissors.React.Server.Websockets
                     {
                         await SendMessage(game.Player2, JsonSerializer.Serialize(joinMessage));
                     }
+
+                    game.IsInProgress = true;
 
                     result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                     continue;
